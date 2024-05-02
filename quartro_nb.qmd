@@ -1,0 +1,58 @@
+---
+title: "Women in Geo Legacy Project"
+author: "Netra Bhandari, Stephanie Wegscheider"
+format: html
+editor: visual
+---
+
+## Legacy project
+
+Comparing R and Python for a data analysis workflow using geospatial data and benchmark the performances of the different spatial packages.
+
+## Why benchmarking in R and Python??
+
+Benchmarking in R and Python is crucial due to their extensive use in data science, statistics, and machine learning. Both languages have distinct characteristics and their own sets of tools and libraries for performance measurement. Here's why benchmarking is particularly important and commonly performed in both R and Python:
+
+### **1. Performance Optimization**
+
+Both R and Python are interpreted languages, which can sometimes perform slower compared to compiled languages like C or Java. In fields where processing large datasets or running complex algorithms is common, efficient code can significantly reduce execution time and resource consumption. Benchmarking helps identify slow sections of code and opportunities for optimization.
+
+### **2. Algorithm Comparison**
+
+Data scientists and researchers often use multiple approaches to solve a problem. Benchmarking allows them to compare the performance of different algorithms or models in terms of speed, accuracy, and resource usage. This comparison is essential for choosing the most appropriate method for specific data or computational constraints.
+
+### **3. Library and Package Evaluation**
+
+Both R and Python have vibrant communities that contribute libraries and packages. Developers and users frequently benchmark these to ensure they are using the most efficient tools available. For example, in Python, one might compare data manipulation operations in Pandas vs. Dask to determine the best tool for handling large datasets.
+
+### **4. Scalability Testing**
+
+Benchmarking tests how code performs as the size of the dataset grows. This scalability testing is crucial for applications expected to handle varying amounts of data over time, ensuring that the software is robust and performs well under different load conditions.
+
+### **5. Teaching and Learning**
+
+For educators and learners, benchmarking provides practical insights into how different coding practices affect performance. It can be an excellent teaching tool to illustrate the importance of efficient coding and selecting the right tool for the job.
+
+### **6. Reproducibility**
+
+In scientific research, ensuring that computational experiments are reproducible is essential. Benchmarking can provide a measure of how software performance might vary across different hardware or software environments, which is crucial for replicating study results.
+
+### **Tools for Benchmarking**
+
+-   **In R**, packages like **`microbenchmark`** and **`bench`** offer detailed profiling for small pieces of code, focusing on execution time and memory usage.
+
+-   **In Python**, tools like **`timeit`** for small code snippets and **`profile`** or **`cProfile`** for larger applications help measure the execution time and identify performance bottlenecks.
+
+In both languages, the integration of these tools into the development and research workflow promotes the creation of more efficient, robust, and reliable code, which is essential in professional and academic settings.
+
+```{r}
+
+```
+
+You can add options to executable code like this
+
+```{r}
+
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
