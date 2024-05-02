@@ -45,7 +45,20 @@ In scientific research, ensuring that computational experiments are reproducible
 
 In both languages, the integration of these tools into the development and research workflow promotes the creation of more efficient, robust, and reliable code, which is essential in professional and academic settings.
 
+## Questions 
+
+-   How is GDP and life expectancy related across world?
+
+-   Male vs female life expectancy
+
+## Anlaysis in R
+
 ```{r}
+
+if (!require(pacman)) install.packages("pacman")
+library(pacman)
+#load libraries
+pacman::p_load(terra,raster, reticulate)
 
 ```
 
@@ -53,6 +66,18 @@ You can add options to executable code like this
 
 ```{r}
 
+#load in the data
+
+gdp = read.csv()
+
+
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
+
+## Analysis in Python
+
+```{python}
+import numpy as np
+
+```
