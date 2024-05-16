@@ -5,7 +5,7 @@ format: html
 editor: visual
 ---
 
-## Legacy project
+## Legacy project (not yet complete)
 
 Comparing R and Python for a data analysis workflow using geospatial data and benchmark the performances of the different spatial packages.
 
@@ -45,7 +45,7 @@ In scientific research, ensuring that computational experiments are reproducible
 
 In both languages, the integration of these tools into the development and research workflow promotes the creation of more efficient, robust, and reliable code, which is essential in professional and academic settings.
 
-## Questions 
+## Questions
 
 -   How is GDP and life expectancy related across world?
 
@@ -53,31 +53,137 @@ In both languages, the integration of these tools into the development and resea
 
 ## Anlaysis in R
 
-```{r}
+1.  Load in your needed libraries.
+
+    We will use two very popular geospatial libraries - *terra* and *raster* and compare their performances.
+
+```{r, message=FALSE, warning=FALSE}
 
 if (!require(pacman)) install.packages("pacman")
 library(pacman)
 #load libraries
-pacman::p_load(terra,raster, reticulate)
+pacman::p_load(terra,raster, reticulate, tidyverse, dplyr, skimr, janitor)
 
 ```
 
-You can add options to executable code like this
+2.  Read in your desired dataset. Here we are looking at the gross domestic product and the life expectancy in world.
 
 ```{r}
 
 #load in the data
 
-gdp = read.csv()
+gdp = read.csv("./gdp-per-capita-penn-world-table.csv")
+life_expectancy = read.csv("./life-expectancy.csv")
+
+```
+
+Let's have an overview of our dataset
+
+```{r}
+skim(gdp)
+skim(life_expectancy)
+```
+
+``` R
 
 
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```         
+```
+
+```{r}
+# Clean the column names
+gdp <- clean_names(gdp)
+life_expectancy <- clean_names(life_expectancy)
+merged_data <- merge(gdp, life_expectancy, by = c("entity", "year","code"))
+
+# Correct the country names
+name_correction <- c(
+  "Antigua and Barbuda" = "Antigua & Barbuda",
+  "Bosnia and Herzegovina" = "Bosnia & Herzegovina",
+  "Brunei" = "Brunei Darussalam",
+  "Cote d'Ivoire" = "Côte d'Ivoire",
+  "Czechia" = "Czech Republic",
+  "Democratic Republic of Congo" = "Democratic Republic of the Congo",
+  "Eswatini" = "Swaziland",
+  "Iran" = "Iran (Islamic Republic of)",
+  "Laos" = "Lao People's Democratic Republic",
+  "Moldova" = "Moldova, Republic of",
+  "North Macedonia" = "The former Yugoslav Republic of Macedonia",
+  "Palestine" = "West Bank",
+  "Russia" = "Russian Federation",
+  "Sint Maarten (Dutch part)" = "Netherlands Antilles",
+  "South Korea" = "Republic of Korea",
+  "Syria" = "Syrian Arab Republic",
+  "Tanzania" = "United Republic of Tanzania",
+  "United Kingdom" = "U.K. of Great Britain and Northern Ireland",
+  "United States" = "United States of America"
+)
+
+
+# Apply the corrections to both datasets
+gdp$entity <- recode(gdp$entity, !!!name_correction)
+life_expectancy$entity <- recode(life_expectancy$entity, !!!name_correction)
+
+merged_data <- merged_data %>% rename(life_expectancy = period_life_expectancy_at_birth_sex_all_age_0,
+                                      gdp = gdp_per_capita_output_multiple_price_benchmarks)
+
+# Data cleaning
+merged_data <- na.omit(merged_data)
+
+correlation_by_country <- merged_data %>%
+  group_by(entity) %>%
+  summarize(correlation = cor(gdp, life_expectancy))
+
+print(correlation_by_country)
+```
+
+```{r}
+# Load the world shapefile
+world_shapefile <- st_read("D:/github/WG_legacyproject_2024/world-administrative-boundaries/world-administrative-boundaries.shp")
+
+world_shapefile <- world_shapefile %>%
+  rename(entity = name)
+
+
+
+# Define the lists
+list1 <- world_shapefile$entity
+list2 <- correlation_by_country$entity
+
+# Find differences
+not_in_list1 <- setdiff(list2, list1)
+not_in_list2 <- setdiff(list1, list2)
+
+# Print the results
+cat("Countries in list2 but not in list1:\n")
+print(not_in_list1)
+
+cat("\nCountries in list1 but not in list2:\n")
+print(not_in_list2)
+
+
+
+
+
+# Merge the shapefile with the correlation data
+world_shapefile <- left_join(world_shapefile, correlation_by_country, by = "entity")
+
+# Apply the corrections to the correlation data
+correlation_by_country$entity <- recode(correlation_by_country$entity, !!!name_correction)
+
+
+
+
+# Plot the correlation on the world map
+tm_shape(world_shapefile) +
+  tm_polygons("correlation", palette = "RdYlBu", title = "Correlation between GDP and Life Expectancy") +
+  tm_layout(title = "Correlation between GDP per Capita and Life Expectancy by Country",
+            legend.outside = TRUE)
+```
 
 ## Analysis in Python
 
-```{python}
-import numpy as np
-
+```         
 ```
