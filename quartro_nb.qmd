@@ -5,13 +5,13 @@ format: html
 editor: visual
 ---
 
-## Legacy project (not yet complete)
+## Legacy project 
 
-Comparing R and Python for a data analysis workflow using geospatial data and benchmark the performances of the different spatial packages.
+Using R for a data analysis workflow of geospatial data and benchmark the performances of the different spatial packages.
 
-## Why benchmarking in R and Python??
+## Why benchmarking ??
 
-Benchmarking in R and Python is crucial due to their extensive use in data science, statistics, and machine learning. Both languages have distinct characteristics and their own sets of tools and libraries for performance measurement. Here's why benchmarking is particularly important and commonly performed in both R and Python:
+Benchmarking in R n is crucial due to its extensive use in data science, statistics, and machine learning. Programming languages like R and Python have distinct characteristics and their own sets of tools and libraries for performance measurement. Here's why benchmarking is particularly important and commonly performed in both R and Python:
 
 ### **1. Performance Optimization**
 
@@ -51,7 +51,7 @@ In both languages, the integration of these tools into the development and resea
 
 -   Male vs female life expectancy
 
-## Anlaysis in R
+## Benchmarking in R
 
 1.  Load in your needed libraries.
 
@@ -62,7 +62,8 @@ In both languages, the integration of these tools into the development and resea
 if (!require(pacman)) install.packages("pacman")
 library(pacman)
 #load libraries
-pacman::p_load(terra,raster, reticulate, tidyverse, dplyr, skimr, janitor)
+pacman::p_load(terra,raster, reticulate, tidyverse, dplyr, skimr, janitor, microbenchmark,sf, ggplot2,tmap, exactextractr)
+
 
 ```
 
@@ -84,12 +85,7 @@ skim(gdp)
 skim(life_expectancy)
 ```
 
-``` R
-
-
-```
-
-```         
+``` r
 ```
 
 ```{r}
@@ -164,9 +160,6 @@ cat("\nCountries in list1 but not in list2:\n")
 print(not_in_list2)
 
 
-
-
-
 # Merge the shapefile with the correlation data
 world_shapefile <- left_join(world_shapefile, correlation_by_country, by = "entity")
 
@@ -183,7 +176,240 @@ tm_shape(world_shapefile) +
             legend.outside = TRUE)
 ```
 
-## Analysis in Python
+### **Load the Night-time Lights Data**
+
+```{r}
+
+path = "D:/github/WG_legacyproject_2024/night_time_lights_2019-20240517T094458Z-001/night_time_lights_2019/"
+# Using raster
+viirs_raster1 <- raster(paste0(path, "VIIRS_Nighttime_Lights_2019-0000000000-0000000000.tif"))
+viirs_raster2 <- raster(paste0(path, "VIIRS_Nighttime_Lights_2019-0000032768-0000000000.tif"))
+#using terra
+viirs_terra1 <- rast(paste0(path, "VIIRS_Nighttime_Lights_2019-0000000000-0000000000.tif"))
+viirs_terra2 <- rast(paste0(path, "VIIRS_Nighttime_Lights_2019-0000032768-0000000000.tif"))
+
+
+## merge the rasters
+viirs_raster <- merge(viirs_raster1, viirs_raster2)
+viirs_terra <- merge(viirs_terra1, viirs_terra2)
+```
+
+**Benchmark the Performance**:
+
+```{r}
+benchmark_results <- microbenchmark(
+  raster_load = {
+    viirs_raster1 <- raster(paste0(path, "VIIRS_Nighttime_Lights_2019-0000000000-0000000000.tif"))
+    viirs_raster2 <- raster(paste0(path, "VIIRS_Nighttime_Lights_2019-0000032768-0000000000.tif"))
+    viirs_raster <- merge(viirs_raster1, viirs_raster2)
+  },
+  terra_load = {
+    viirs_terra1 <- rast(paste0(path, "VIIRS_Nighttime_Lights_2019-0000000000-0000000000.tif"))
+    viirs_terra2 <- rast(paste0(path, "VIIRS_Nighttime_Lights_2019-0000032768-0000000000.tif"))
+    viirs_terra <- merge(viirs_terra1, viirs_terra2)
+  },
+  times = 10
+)
+print(benchmark_results)
+
+
+```
+
+-   **Loading and Merging with `raster`**:
+
+    -   **Minimum Time**: 133.25 milliseconds
+
+    -   **Maximum Time**: 479.51 milliseconds
+
+    -   **Mean Time**: 195.28 milliseconds
+
+    -   **Median Time**: 146.15 milliseconds
+
+-   **Loading and Merging with `terra`**:
+
+    -   **Minimum Time**: 31.40 milliseconds
+
+    -   **Maximum Time**: 46.05 milliseconds
+
+    -   **Mean Time**: 37.79 milliseconds
+
+    -   **Median Time**: 35.09 milliseconds
+
+        The results indicate that the **`terra`** package significantly outperforms the **`raster`** package in terms of speed for this specific task. On average, **`terra`** is approximately 5 times faster than **`raster`** for loading and merging the night-time lights data. This substantial difference highlights the efficiency improvements in the **`terra`** package.
+
+        ```         
+        ```
+
+```{r}
+## Lets visualize
+benchmark_results_df <- as.data.frame(benchmark_results)
+
+# Plot the benchmark results
+ggplot(benchmark_results_df, aes(x = expr, y = time / 1000, fill = expr)) +
+  geom_boxplot() +
+  scale_y_log10() +
+  labs(title = "Performance Comparison: raster vs. terra",
+       x = "Package",
+       y = "Time (seconds, log scale)",
+       fill = "Package") +
+  theme_minimal() +
+  theme(legend.position = "none")
+ggplot(benchmark_results_df, aes(x = expr, y = time / 1000, fill = expr)) +
+  geom_boxplot() +
+  scale_y_log10() +
+  labs(title = "Performance Comparison: raster vs. terra",
+       x = "Package",
+       y = "Time (seconds, log scale)",
+       fill = "Package") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
 
 ```         
 ```
+
+Now lets try with multiple rasters
+
+So we take India as an example.
+
+```{r}
+path_ind = "D:/github/WG_legacyproject_2024/night_lights-20240517T132555Z-001/night_lights/"
+
+# List all raster files for the years 2012 to 2019
+file_list <- list.files(path_ind, pattern = "VIIRS_Nighttime_Lights_.*\\.tif$", full.names = TRUE)
+
+# Load the raster files using terra and stack them
+viirs_stack <- rast(file_list)
+
+# Print the stack
+print(viirs_stack)
+
+benchmark_results <- microbenchmark(
+  raster_load = {
+    raster_stack <- stack(file_list)
+  },
+  terra_load = {
+    viirs_stack <- rast(file_list)
+  },
+  times = 10
+)
+print(benchmark_results)
+
+# Convert benchmark results to data frame
+benchmark_results_df <- as.data.frame(benchmark_results)
+
+# Plot the benchmark results
+ggplot(benchmark_results_df, aes(x = expr, y = time / 1000, fill = expr)) +
+  geom_boxplot() +
+  scale_y_log10() +
+  labs(title = "Performance Comparison: raster vs. terra",
+       x = "Package",
+       y = "Time (seconds, log scale)",
+       fill = "Package") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+Again we see that terra performs better than raster.
+
+```{r}
+
+# Load GDP data and filter for the years 2012 to 2019
+
+gdp_data_india <- gdp %>% filter(entity == "India" & year >= 2012 & year <= 2019)
+
+# Print the filtered GDP data
+print(gdp_data_india)
+
+
+# Extract mean light intensity for each year
+mean_light_intensity <- sapply(1:nlyr(viirs_stack), function(i) {
+  mean(values(viirs_stack[[i]]), na.rm = TRUE)
+})
+
+# Create a data frame with the extracted mean light intensity and GDP data
+correlation_data <- data.frame(
+  year = 2012:2019,
+  mean_light_intensity = mean_light_intensity,
+  gdp_per_capita = gdp_data_india$gdp_per_capita
+)
+
+# Print the correlation data
+print(correlation_data)
+
+# Calculate correlation
+correlation <- cor(correlation_data$mean_light_intensity, correlation_data$gdp_per_capita, use = "complete.obs")
+print(paste("Correlation between night-time light intensity and GDP per capita:", correlation))
+
+# Plot the relationship
+ggplot(correlation_data, aes(x = mean_light_intensity, y = gdp_per_capita)) +
+  geom_point() +
+  geom_smooth(method = "lm", col = "blue") +
+  labs(title = "Correlation between Night-time Light Intensity and GDP per Capita in India (2012-2019)",
+       x = "Mean Night-time Light Intensity",
+       y = "GDP per Capita") +
+  theme_minimal()
+
+```
+
+The graph shows how the brightness of night-time lights and the average income per person (GDP per capita) in India are related from 2012 to 2019. It suggests that as areas get brighter at night, people's incomes also tend to increase.
+
+-   **Positive Relationship**: The more intense the night-time lights, the higher the GDP per capita. This means that brighter lights, which indicate more economic activity, are linked to higher incomes.
+
+-   **Trend Line**: The blue line shows the overall trend. It goes upwards, confirming that as night-time lights get brighter, GDP per capita increases.
+
+-   **Confidence Interval**: The shaded area around the blue line shows we are pretty confident about this relationship. It means our trend line is reliable.
+
+In simple terms, the graph tells us that brighter night-time lights are a good sign of economic growth and higher incomes in India over these years.
+
+```{r}
+# Filter for India and for the years 2012 to 2019
+life_expectancy_india <- life_expectancy %>% 
+  filter(entity == "India" & year >= 2012 & year <= 2019)
+
+# Extract mean light intensity for each year
+mean_light_intensity <- sapply(1:nlyr(viirs_stack), function(i) {
+  mean(values(viirs_stack[[i]]), na.rm = TRUE)
+})
+
+# Create a data frame with the extracted mean light intensity
+light_intensity_data <- data.frame(
+  year = 2012:2019,
+  mean_light_intensity = mean_light_intensity
+)
+
+# Merge life expectancy data with light intensity data
+merged_data <- merge(life_expectancy_india, light_intensity_data, by = "year")
+
+# Ensure that the merged data contains mean light intensity and life expectancy
+print(merged_data)
+
+# Check for NAs in the relevant columns
+print(sum(is.na(merged_data$mean_light_intensity)))
+print(sum(is.na(merged_data$period_life_expectancy_at_birth_sex_all_age_0)))
+
+# Calculate correlation
+correlation <- cor(merged_data$mean_light_intensity, merged_data$period_life_expectancy_at_birth_sex_all_age_0, use = "complete.obs")
+print(paste("Correlation between night-time light intensity and life expectancy:", correlation))
+
+# Plot the relationship
+ggplot(merged_data, aes(x = mean_light_intensity, y = period_life_expectancy_at_birth_sex_all_age_0)) +
+  geom_point() +
+  geom_smooth(method = "lm", col = "blue") +
+  labs(title = "Correlation between Night-time Light Intensity and Life Expectancy in India (2012-2019)",
+       x = "Mean Night-time Light Intensity",
+       y = "Life Expectancy at Birth") +
+  theme_minimal()
+```
+
+The graph shows how the brightness of night-time lights and the average lifespan (life expectancy) in India are related from 2012 to 2019. It suggests that as areas get brighter at night, people tend to live longer.
+
+-   **Positive Relationship**: The more intense the night-time lights, the higher the life expectancy. This means that brighter lights, which indicate more economic activity, are linked to people living longer.
+
+-   **Trend Line**: The blue line shows the overall trend. It goes upwards, confirming that as night-time lights get brighter, life expectancy increases.
+
+-   **Confidence Interval**: The shaded area around the blue line shows we are pretty confident about this relationship. It means our trend line is reliable.
+
+In simple terms, the graph tells us that brighter night-time lights are a good sign of people living longer in India over these years.
+
+## 

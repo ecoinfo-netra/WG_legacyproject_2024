@@ -103,11 +103,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="legacy-project" class="level2">
 <h2 class="anchored" data-anchor-id="legacy-project">Legacy project</h2>
-<p>Comparing R and Python for a data analysis workflow using geospatial data and benchmark the performances of the different spatial packages.</p>
+<p>Using R for a data analysis workflow of geospatial data and benchmark the performances of the different spatial packages.</p>
 </section>
-<section id="why-benchmarking-in-r-and-python" class="level2">
-<h2 class="anchored" data-anchor-id="why-benchmarking-in-r-and-python">Why benchmarking in R and Python??</h2>
-<p>Benchmarking in R and Python is crucial due to their extensive use in data science, statistics, and machine learning. Both languages have distinct characteristics and their own sets of tools and libraries for performance measurement. Here’s why benchmarking is particularly important and commonly performed in both R and Python:</p>
+<section id="why-benchmarking" class="level2">
+<h2 class="anchored" data-anchor-id="why-benchmarking">Why benchmarking ??</h2>
+<p>Benchmarking in R n is crucial due to its extensive use in data science, statistics, and machine learning. Programming languages like R and Python have distinct characteristics and their own sets of tools and libraries for performance measurement. Here’s why benchmarking is particularly important and commonly performed in both R and Python:</p>
 <section id="performance-optimization" class="level3">
 <h3 class="anchored" data-anchor-id="performance-optimization"><strong>1. Performance Optimization</strong></h3>
 <p>Both R and Python are interpreted languages, which can sometimes perform slower compared to compiled languages like C or Java. In fields where processing large datasets or running complex algorithms is common, efficient code can significantly reduce execution time and resource consumption. Benchmarking helps identify slow sections of code and opportunities for optimization.</p>
@@ -148,8 +148,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>Male vs female life expectancy</p></li>
 </ul>
 </section>
-<section id="anlaysis-in-r" class="level2">
-<h2 class="anchored" data-anchor-id="anlaysis-in-r">Anlaysis in R</h2>
+<section id="benchmarking-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="benchmarking-in-r">Benchmarking in R</h2>
 <ol type="1">
 <li><p>Load in your needed libraries.</p>
 <p>We will use two very popular geospatial libraries - <em>terra</em> and <em>raster</em> and compare their performances.</p></li>
@@ -158,7 +158,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(pacman)) <span class="fu">install.packages</span>(<span class="st">"pacman"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pacman)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#load libraries</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(terra,raster, reticulate, tidyverse, dplyr, skimr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(terra,raster, reticulate, tidyverse, dplyr, skimr, janitor, microbenchmark,sf, ggplot2,tmap, exactextractr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="2" type="1">
 <li>Read in your desired dataset. Here we are looking at the gross domestic product and the life expectancy in world.</li>
@@ -321,12 +321,687 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(life_expectancy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">life_expectancy</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">20755</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">character</td>
+<td style="text-align: left;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 13%">
+<col style="width: 19%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 12%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">empty</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: right;">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Entity</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">261</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Code</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">1694</td>
+<td style="text-align: right;">239</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 39%">
+<col style="width: 7%">
+<col style="width: 10%">
+<col style="width: 6%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 4%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p25</th>
+<th style="text-align: right;">p50</th>
+<th style="text-align: right;">p75</th>
+<th style="text-align: right;">p100</th>
+<th style="text-align: left;">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Year</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1975.73</td>
+<td style="text-align: right;">38.42</td>
+<td style="text-align: right;">1543</td>
+<td style="text-align: right;">1961.00</td>
+<td style="text-align: right;">1981.00</td>
+<td style="text-align: right;">2001.00</td>
+<td style="text-align: right;">2021.00</td>
+<td style="text-align: left;">▁▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Period.life.expectancy.at.birth…Sex..all…Age..0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">61.62</td>
+<td style="text-align: right;">12.92</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">52.19</td>
+<td style="text-align: right;">64.06</td>
+<td style="text-align: right;">71.82</td>
+<td style="text-align: right;">86.54</td>
+<td style="text-align: left;">▁▂▅▇▅</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean the column names</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>gdp <span class="ot">&lt;-</span> <span class="fu">clean_names</span>(gdp)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>life_expectancy <span class="ot">&lt;-</span> <span class="fu">clean_names</span>(life_expectancy)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> <span class="fu">merge</span>(gdp, life_expectancy, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"entity"</span>, <span class="st">"year"</span>,<span class="st">"code"</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Correct the country names</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>name_correction <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Antigua and Barbuda"</span> <span class="ot">=</span> <span class="st">"Antigua &amp; Barbuda"</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Bosnia and Herzegovina"</span> <span class="ot">=</span> <span class="st">"Bosnia &amp; Herzegovina"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Brunei"</span> <span class="ot">=</span> <span class="st">"Brunei Darussalam"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Cote d'Ivoire"</span> <span class="ot">=</span> <span class="st">"Côte d'Ivoire"</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Czechia"</span> <span class="ot">=</span> <span class="st">"Czech Republic"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Democratic Republic of Congo"</span> <span class="ot">=</span> <span class="st">"Democratic Republic of the Congo"</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Eswatini"</span> <span class="ot">=</span> <span class="st">"Swaziland"</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Iran"</span> <span class="ot">=</span> <span class="st">"Iran (Islamic Republic of)"</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Laos"</span> <span class="ot">=</span> <span class="st">"Lao People's Democratic Republic"</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Moldova"</span> <span class="ot">=</span> <span class="st">"Moldova, Republic of"</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"North Macedonia"</span> <span class="ot">=</span> <span class="st">"The former Yugoslav Republic of Macedonia"</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Palestine"</span> <span class="ot">=</span> <span class="st">"West Bank"</span>,</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Russia"</span> <span class="ot">=</span> <span class="st">"Russian Federation"</span>,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sint Maarten (Dutch part)"</span> <span class="ot">=</span> <span class="st">"Netherlands Antilles"</span>,</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"South Korea"</span> <span class="ot">=</span> <span class="st">"Republic of Korea"</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Syria"</span> <span class="ot">=</span> <span class="st">"Syrian Arab Republic"</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Tanzania"</span> <span class="ot">=</span> <span class="st">"United Republic of Tanzania"</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"United Kingdom"</span> <span class="ot">=</span> <span class="st">"U.K. of Great Britain and Northern Ireland"</span>,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"United States"</span> <span class="ot">=</span> <span class="st">"United States of America"</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the corrections to both datasets</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>gdp<span class="sc">$</span>entity <span class="ot">&lt;-</span> <span class="fu">recode</span>(gdp<span class="sc">$</span>entity, <span class="sc">!!!</span>name_correction)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>life_expectancy<span class="sc">$</span>entity <span class="ot">&lt;-</span> <span class="fu">recode</span>(life_expectancy<span class="sc">$</span>entity, <span class="sc">!!!</span>name_correction)</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> merged_data <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">life_expectancy =</span> period_life_expectancy_at_birth_sex_all_age_0,</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">gdp =</span> gdp_per_capita_output_multiple_price_benchmarks)</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Data cleaning</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(merged_data)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>correlation_by_country <span class="ot">&lt;-</span> merged_data <span class="sc">%&gt;%</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(entity) <span class="sc">%&gt;%</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">correlation =</span> <span class="fu">cor</span>(gdp, life_expectancy))</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(correlation_by_country)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 182 × 2
+   entity              correlation
+   &lt;chr&gt;                     &lt;dbl&gt;
+ 1 Albania                   0.837
+ 2 Algeria                   0.591
+ 3 Angola                    0.806
+ 4 Anguilla                  0.706
+ 5 Antigua and Barbuda       0.785
+ 6 Argentina                 0.931
+ 7 Armenia                   0.962
+ 8 Aruba                     0.663
+ 9 Australia                 0.981
+10 Austria                   0.983
+# ℹ 172 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the world shapefile</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>world_shapefile <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"D:/github/WG_legacyproject_2024/world-administrative-boundaries/world-administrative-boundaries.shp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `world-administrative-boundaries' from data source 
+  `D:\github\WG_legacyproject_2024\world-administrative-boundaries\world-administrative-boundaries.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 256 features and 8 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: -180 ymin: -58.49861 xmax: 180 ymax: 83.6236
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>world_shapefile <span class="ot">&lt;-</span> world_shapefile <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">entity =</span> name)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the lists</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>list1 <span class="ot">&lt;-</span> world_shapefile<span class="sc">$</span>entity</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>list2 <span class="ot">&lt;-</span> correlation_by_country<span class="sc">$</span>entity</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Find differences</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>not_in_list1 <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(list2, list1)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>not_in_list2 <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(list1, list2)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the results</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Countries in list2 but not in list1:</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Countries in list2 but not in list1:</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(not_in_list1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Antigua and Barbuda"          "Bosnia and Herzegovina"      
+ [3] "Brunei"                       "Cote d'Ivoire"               
+ [5] "Curacao"                      "Czechia"                     
+ [7] "Democratic Republic of Congo" "Eswatini"                    
+ [9] "Iran"                         "Laos"                        
+[11] "Moldova"                      "North Macedonia"             
+[13] "Palestine"                    "Russia"                      
+[15] "Sint Maarten (Dutch part)"    "South Korea"                 
+[17] "Syria"                        "Tanzania"                    
+[19] "United Kingdom"               "United States"               </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Countries in list1 but not in list2:</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Countries in list1 but not in list2:</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(not_in_list2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Eritrea"                                   
+ [2] "South Georgia &amp; the South Sandwich Islands"
+ [3] "Jammu-Kashmir"                             
+ [4] "Heard Island and McDonald Islands"         
+ [5] "French Guiana"                             
+ [6] "Democratic Republic of the Congo"          
+ [7] "Papua New Guinea"                          
+ [8] "Mayotte"                                   
+ [9] "Western Sahara"                            
+[10] "Tokelau"                                   
+[11] "United States of America"                  
+[12] "Ma'tan al-Sarra"                           
+[13] "Jersey"                                    
+[14] "Holy See"                                  
+[15] "Glorioso Islands"                          
+[16] "Paracel Islands"                           
+[17] "Guernsey"                                  
+[18] "Palau"                                     
+[19] "Greenland"                                 
+[20] "Abyei"                                     
+[21] "Brunei Darussalam"                         
+[22] "Iran (Islamic Republic of)"                
+[23] "San Marino"                                
+[24] "Marshall Islands"                          
+[25] "Syrian Arab Republic"                      
+[26] "Andorra"                                   
+[27] "Bouvet Island"                             
+[28] "The former Yugoslav Republic of Macedonia" 
+[29] "Vanuatu"                                   
+[30] "Christmas Island"                          
+[31] "United States Virgin Islands"              
+[32] "Faroe Islands"                             
+[33] "Norfolk Island"                            
+[34] "Aksai Chin"                                
+[35] "Monaco"                                    
+[36] "Timor-Leste"                               
+[37] "Republic of Korea"                         
+[38] "Côte d'Ivoire"                             
+[39] "Tonga"                                     
+[40] "Guantanamo"                                
+[41] "Liechtenstein"                             
+[42] "Kiribati"                                  
+[43] "Hala'ib Triangle"                          
+[44] "Cocos (Keeling) Islands"                   
+[45] "Afghanistan"                               
+[46] "Czech Republic"                            
+[47] "Lao People's Democratic Republic"          
+[48] "Russian Federation"                        
+[49] "Ilemi Triangle"                            
+[50] "Spratly Islands"                           
+[51] "Arunachal Pradesh"                         
+[52] "South Sudan"                               
+[53] "U.K. of Great Britain and Northern Ireland"
+[54] "Niue"                                      
+[55] "Somalia"                                   
+[56] "Puerto Rico"                               
+[57] "West Bank"                                 
+[58] "Swaziland"                                 
+[59] "New Caledonia"                             
+[60] "Falkland Islands (Malvinas)"               
+[61] "Democratic People's Republic of Korea"     
+[62] "Isle of Man"                               
+[63] "Moldova, Republic of"                      
+[64] "Nauru"                                     
+[65] "American Samoa"                            
+[66] "Northern Mariana Islands"                  
+[67] "Kuril Islands"                             
+[68] "Guam"                                      
+[69] "Netherlands Antilles"                      
+[70] "Bosnia &amp; Herzegovina"                      
+[71] "Tuvalu"                                    
+[72] "Gaza Strip"                                
+[73] "Turks and Caicos Islands"                  
+[74] "Cuba"                                      
+[75] "Martinique"                                
+[76] "British Indian Ocean Territory"            
+[77] "Solomon Islands"                           
+[78] "Pitcairn Island"                           
+[79] "French Southern and Antarctic Territories" 
+[80] "Cook Islands"                              
+[81] "Jarvis Island"                             
+[82] "Svalbard and Jan Mayen Islands"            
+[83] "United Republic of Tanzania"               
+[84] "Micronesia (Federated States of)"          
+[85] "Midway Is."                                
+[86] "Reunion"                                   
+[87] "Guadeloupe"                                
+[88] "French Polynesia"                          
+[89] "Azores Islands"                            
+[90] "Madeira Islands"                           
+[91] "Gibraltar"                                 
+[92] "Antigua &amp; Barbuda"                         
+[93] "Samoa"                                     
+[94] "Libyan Arab Jamahiriya"                    </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge the shapefile with the correlation data</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>world_shapefile <span class="ot">&lt;-</span> <span class="fu">left_join</span>(world_shapefile, correlation_by_country, <span class="at">by =</span> <span class="st">"entity"</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the corrections to the correlation data</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>correlation_by_country<span class="sc">$</span>entity <span class="ot">&lt;-</span> <span class="fu">recode</span>(correlation_by_country<span class="sc">$</span>entity, <span class="sc">!!!</span>name_correction)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the correlation on the world map</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(world_shapefile) <span class="sc">+</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="st">"correlation"</span>, <span class="at">palette =</span> <span class="st">"RdYlBu"</span>, <span class="at">title =</span> <span class="st">"Correlation between GDP and Life Expectancy"</span>) <span class="sc">+</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">title =</span> <span class="st">"Correlation between GDP per Capita and Life Expectancy by Country"</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.outside =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Variable(s) "correlation" contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full spectrum of the color palette.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="quartro_nb_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="load-the-night-time-lights-data" class="level3">
+<h3 class="anchored" data-anchor-id="load-the-night-time-lights-data"><strong>Load the Night-time Lights Data</strong></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>path <span class="ot">=</span> <span class="st">"D:/github/WG_legacyproject_2024/night_time_lights_2019-20240517T094458Z-001/night_time_lights_2019/"</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Using raster</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>viirs_raster1 <span class="ot">&lt;-</span> <span class="fu">raster</span>(<span class="fu">paste0</span>(path, <span class="st">"VIIRS_Nighttime_Lights_2019-0000000000-0000000000.tif"</span>))</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>viirs_raster2 <span class="ot">&lt;-</span> <span class="fu">raster</span>(<span class="fu">paste0</span>(path, <span class="st">"VIIRS_Nighttime_Lights_2019-0000032768-0000000000.tif"</span>))</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co">#using terra</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>viirs_terra1 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="fu">paste0</span>(path, <span class="st">"VIIRS_Nighttime_Lights_2019-0000000000-0000000000.tif"</span>))</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>viirs_terra2 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="fu">paste0</span>(path, <span class="st">"VIIRS_Nighttime_Lights_2019-0000032768-0000000000.tif"</span>))</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="do">## merge the rasters</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>viirs_raster <span class="ot">&lt;-</span> <span class="fu">merge</span>(viirs_raster1, viirs_raster2)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>viirs_terra <span class="ot">&lt;-</span> <span class="fu">merge</span>(viirs_terra1, viirs_terra2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Benchmark the Performance</strong>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>benchmark_results <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">raster_load =</span> {</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    viirs_raster1 <span class="ot">&lt;-</span> <span class="fu">raster</span>(<span class="fu">paste0</span>(path, <span class="st">"VIIRS_Nighttime_Lights_2019-0000000000-0000000000.tif"</span>))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    viirs_raster2 <span class="ot">&lt;-</span> <span class="fu">raster</span>(<span class="fu">paste0</span>(path, <span class="st">"VIIRS_Nighttime_Lights_2019-0000032768-0000000000.tif"</span>))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    viirs_raster <span class="ot">&lt;-</span> <span class="fu">merge</span>(viirs_raster1, viirs_raster2)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">terra_load =</span> {</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    viirs_terra1 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="fu">paste0</span>(path, <span class="st">"VIIRS_Nighttime_Lights_2019-0000000000-0000000000.tif"</span>))</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    viirs_terra2 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="fu">paste0</span>(path, <span class="st">"VIIRS_Nighttime_Lights_2019-0000032768-0000000000.tif"</span>))</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    viirs_terra <span class="ot">&lt;-</span> <span class="fu">merge</span>(viirs_terra1, viirs_terra2)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">10</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(benchmark_results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: milliseconds
+        expr      min       lq      mean   median       uq      max neval cld
+ raster_load 129.7463 138.8076 180.64269 146.1422 158.6181 458.7341    10  a 
+  terra_load  26.5563  27.6951  38.59203  35.3880  52.6900  56.3438    10   b</code></pre>
+</div>
+</div>
+<ul>
+<li><p><strong>Loading and Merging with <code>raster</code></strong>:</p>
+<ul>
+<li><p><strong>Minimum Time</strong>: 133.25 milliseconds</p></li>
+<li><p><strong>Maximum Time</strong>: 479.51 milliseconds</p></li>
+<li><p><strong>Mean Time</strong>: 195.28 milliseconds</p></li>
+<li><p><strong>Median Time</strong>: 146.15 milliseconds</p></li>
+</ul></li>
+<li><p><strong>Loading and Merging with <code>terra</code></strong>:</p>
+<ul>
+<li><p><strong>Minimum Time</strong>: 31.40 milliseconds</p></li>
+<li><p><strong>Maximum Time</strong>: 46.05 milliseconds</p></li>
+<li><p><strong>Mean Time</strong>: 37.79 milliseconds</p></li>
+<li><p><strong>Median Time</strong>: 35.09 milliseconds</p>
+<p>The results indicate that the <strong><code>terra</code></strong> package significantly outperforms the <strong><code>raster</code></strong> package in terms of speed for this specific task. On average, <strong><code>terra</code></strong> is approximately 5 times faster than <strong><code>raster</code></strong> for loading and merging the night-time lights data. This substantial difference highlights the efficiency improvements in the <strong><code>terra</code></strong> package.</p>
+<pre><code></code></pre></li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Lets visualize</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>benchmark_results_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(benchmark_results)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the benchmark results</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(benchmark_results_df, <span class="fu">aes</span>(<span class="at">x =</span> expr, <span class="at">y =</span> time <span class="sc">/</span> <span class="dv">1000</span>, <span class="at">fill =</span> expr)) <span class="sc">+</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Performance Comparison: raster vs. terra"</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Package"</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Time (seconds, log scale)"</span>,</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Package"</span>) <span class="sc">+</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="quartro_nb_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(benchmark_results_df, <span class="fu">aes</span>(<span class="at">x =</span> expr, <span class="at">y =</span> time <span class="sc">/</span> <span class="dv">1000</span>, <span class="at">fill =</span> expr)) <span class="sc">+</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Performance Comparison: raster vs. terra"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Package"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Time (seconds, log scale)"</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Package"</span>) <span class="sc">+</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="quartro_nb_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 <pre><code></code></pre>
+<p>Now lets try with multiple rasters</p>
+<p>So we take India as an example.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>path_ind <span class="ot">=</span> <span class="st">"D:/github/WG_legacyproject_2024/night_lights-20240517T132555Z-001/night_lights/"</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co"># List all raster files for the years 2012 to 2019</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>file_list <span class="ot">&lt;-</span> <span class="fu">list.files</span>(path_ind, <span class="at">pattern =</span> <span class="st">"VIIRS_Nighttime_Lights_.*</span><span class="sc">\\</span><span class="st">.tif$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the raster files using terra and stack them</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>viirs_stack <span class="ot">&lt;-</span> <span class="fu">rast</span>(file_list)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the stack</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(viirs_stack)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class       : SpatRaster 
+dimensions  : 6404, 6510, 8  (nrow, ncol, nlyr)
+resolution  : 0.004491576, 0.004491576  (x, y)
+extent      : 68.15967, 97.39983, 6.750839, 35.51489  (xmin, xmax, ymin, ymax)
+coord. ref. : lon/lat WGS 84 (EPSG:4326) 
+sources     : VIIRS_Nighttime_Lights_2012.tif  
+              VIIRS_Nighttime_Lights_2013.tif  
+              VIIRS_Nighttime_Lights_2014.tif  
+              ... and 5 more source(s)
+names       : avg_rad, avg_rad, avg_rad, avg_rad, avg_rad, avg_rad, ... </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>benchmark_results <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">raster_load =</span> {</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    raster_stack <span class="ot">&lt;-</span> <span class="fu">stack</span>(file_list)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">terra_load =</span> {</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    viirs_stack <span class="ot">&lt;-</span> <span class="fu">rast</span>(file_list)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">10</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(benchmark_results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: milliseconds
+        expr      min       lq      mean   median       uq      max neval cld
+ raster_load 181.5192 196.0777 224.89970 204.5908 279.9719 289.8414    10  a 
+  terra_load  23.1003  31.0727  35.59507  37.2302  40.7950  43.0817    10   b</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert benchmark results to data frame</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>benchmark_results_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(benchmark_results)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the benchmark results</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(benchmark_results_df, <span class="fu">aes</span>(<span class="at">x =</span> expr, <span class="at">y =</span> time <span class="sc">/</span> <span class="dv">1000</span>, <span class="at">fill =</span> expr)) <span class="sc">+</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Performance Comparison: raster vs. terra"</span>,</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Package"</span>,</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Time (seconds, log scale)"</span>,</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Package"</span>) <span class="sc">+</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="quartro_nb_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Again we see that terra performs better than raster.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load GDP data and filter for the years 2012 to 2019</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>gdp_data_india <span class="ot">&lt;-</span> gdp <span class="sc">%&gt;%</span> <span class="fu">filter</span>(entity <span class="sc">==</span> <span class="st">"India"</span> <span class="sc">&amp;</span> year <span class="sc">&gt;=</span> <span class="dv">2012</span> <span class="sc">&amp;</span> year <span class="sc">&lt;=</span> <span class="dv">2019</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the filtered GDP data</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(gdp_data_india)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  entity code year gdp_per_capita_output_multiple_price_benchmarks
+1  India  IND 2012                                        5230.332
+2  India  IND 2013                                        5236.998
+3  India  IND 2014                                        5397.072
+4  India  IND 2015                                        5634.441
+5  India  IND 2016                                        5886.458
+6  India  IND 2017                                        6188.457
+7  India  IND 2018                                        6579.506
+8  India  IND 2019                                        6711.385</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract mean light intensity for each year</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>mean_light_intensity <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nlyr</span>(viirs_stack), <span class="cf">function</span>(i) {</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">values</span>(viirs_stack[[i]]), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a data frame with the extracted mean light intensity and GDP data</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>correlation_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2012</span><span class="sc">:</span><span class="dv">2019</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_light_intensity =</span> mean_light_intensity,</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">gdp_per_capita =</span> gdp_data_india<span class="sc">$</span>gdp_per_capita</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the correlation data</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(correlation_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  year mean_light_intensity gdp_per_capita
+1 2012            0.4850598       5230.332
+2 2013            0.5815722       5236.998
+3 2014            0.6539683       5397.072
+4 2015            0.7046336       5634.441
+5 2016            0.6601578       5886.458
+6 2017            0.8800396       6188.457
+7 2018            0.8744889       6579.506
+8 2019            0.8763295       6711.385</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate correlation</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>correlation <span class="ot">&lt;-</span> <span class="fu">cor</span>(correlation_data<span class="sc">$</span>mean_light_intensity, correlation_data<span class="sc">$</span>gdp_per_capita, <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Correlation between night-time light intensity and GDP per capita:"</span>, correlation))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Correlation between night-time light intensity and GDP per capita: 0.91989338185835"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the relationship</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(correlation_data, <span class="fu">aes</span>(<span class="at">x =</span> mean_light_intensity, <span class="at">y =</span> gdp_per_capita)) <span class="sc">+</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">col =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Correlation between Night-time Light Intensity and GDP per Capita in India (2012-2019)"</span>,</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Mean Night-time Light Intensity"</span>,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"GDP per Capita"</span>) <span class="sc">+</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="quartro_nb_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The graph shows how the brightness of night-time lights and the average income per person (GDP per capita) in India are related from 2012 to 2019. It suggests that as areas get brighter at night, people’s incomes also tend to increase.</p>
+<ul>
+<li><p><strong>Positive Relationship</strong>: The more intense the night-time lights, the higher the GDP per capita. This means that brighter lights, which indicate more economic activity, are linked to higher incomes.</p></li>
+<li><p><strong>Trend Line</strong>: The blue line shows the overall trend. It goes upwards, confirming that as night-time lights get brighter, GDP per capita increases.</p></li>
+<li><p><strong>Confidence Interval</strong>: The shaded area around the blue line shows we are pretty confident about this relationship. It means our trend line is reliable.</p></li>
+</ul>
+<p>In simple terms, the graph tells us that brighter night-time lights are a good sign of economic growth and higher incomes in India over these years.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter for India and for the years 2012 to 2019</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>life_expectancy_india <span class="ot">&lt;-</span> life_expectancy <span class="sc">%&gt;%</span> </span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(entity <span class="sc">==</span> <span class="st">"India"</span> <span class="sc">&amp;</span> year <span class="sc">&gt;=</span> <span class="dv">2012</span> <span class="sc">&amp;</span> year <span class="sc">&lt;=</span> <span class="dv">2019</span>)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract mean light intensity for each year</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>mean_light_intensity <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nlyr</span>(viirs_stack), <span class="cf">function</span>(i) {</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">values</span>(viirs_stack[[i]]), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a data frame with the extracted mean light intensity</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>light_intensity_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2012</span><span class="sc">:</span><span class="dv">2019</span>,</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_light_intensity =</span> mean_light_intensity</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge life expectancy data with light intensity data</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> <span class="fu">merge</span>(life_expectancy_india, light_intensity_data, <span class="at">by =</span> <span class="st">"year"</span>)</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure that the merged data contains mean light intensity and life expectancy</span></span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(merged_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  year entity code period_life_expectancy_at_birth_sex_all_age_0
+1 2012  India  IND                                       67.8872
+2 2013  India  IND                                       68.4598
+3 2014  India  IND                                       69.0736
+4 2015  India  IND                                       69.6363
+5 2016  India  IND                                       70.1167
+6 2017  India  IND                                       70.4672
+7 2018  India  IND                                       70.7095
+8 2019  India  IND                                       70.9098
+  mean_light_intensity
+1            0.4850598
+2            0.5815722
+3            0.6539683
+4            0.7046336
+5            0.6601578
+6            0.8800396
+7            0.8744889
+8            0.8763295</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for NAs in the relevant columns</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sum</span>(<span class="fu">is.na</span>(merged_data<span class="sc">$</span>mean_light_intensity)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sum</span>(<span class="fu">is.na</span>(merged_data<span class="sc">$</span>period_life_expectancy_at_birth_sex_all_age_0)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate correlation</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>correlation <span class="ot">&lt;-</span> <span class="fu">cor</span>(merged_data<span class="sc">$</span>mean_light_intensity, merged_data<span class="sc">$</span>period_life_expectancy_at_birth_sex_all_age_0, <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Correlation between night-time light intensity and life expectancy:"</span>, correlation))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Correlation between night-time light intensity and life expectancy: 0.940802150811956"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the relationship</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged_data, <span class="fu">aes</span>(<span class="at">x =</span> mean_light_intensity, <span class="at">y =</span> period_life_expectancy_at_birth_sex_all_age_0)) <span class="sc">+</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">col =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Correlation between Night-time Light Intensity and Life Expectancy in India (2012-2019)"</span>,</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Mean Night-time Light Intensity"</span>,</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Life Expectancy at Birth"</span>) <span class="sc">+</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="quartro_nb_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The graph shows how the brightness of night-time lights and the average lifespan (life expectancy) in India are related from 2012 to 2019. It suggests that as areas get brighter at night, people tend to live longer.</p>
+<ul>
+<li><p><strong>Positive Relationship</strong>: The more intense the night-time lights, the higher the life expectancy. This means that brighter lights, which indicate more economic activity, are linked to people living longer.</p></li>
+<li><p><strong>Trend Line</strong>: The blue line shows the overall trend. It goes upwards, confirming that as night-time lights get brighter, life expectancy increases.</p></li>
+<li><p><strong>Confidence Interval</strong>: The shaded area around the blue line shows we are pretty confident about this relationship. It means our trend line is reliable.</p></li>
+</ul>
+<p>In simple terms, the graph tells us that brighter night-time lights are a good sign of people living longer in India over these years.</p>
 </section>
-<section id="analysis-in-python" class="level2">
-<h2 class="anchored" data-anchor-id="analysis-in-python">Analysis in Python</h2>
-<pre><code></code></pre>
+</section>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section"></h2>
 </section>
 
 </main>
